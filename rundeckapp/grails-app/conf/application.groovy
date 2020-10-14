@@ -37,12 +37,10 @@ environments {
         rundeck.feature.executionLifecyclePlugin.enabled = true
         rundeck.feature.legacyExecOutputViewer.enabled = false
         rundeck.feature.notificationsEditorVue.enabled = true
-<<<<<<< HEAD
         rundeck.feature.projectManagerServiceBootstrapWarmupCache.enabled = true
         rundeck.feature.authorizationServiceBootstrapWarmupCache.enabled = true
-=======
         rundeck.feature.uiNext.enabled = false
->>>>>>> Use new root theme dir
+
         dataSource {
             dbCreate = "create-drop" // one of 'create', 'create-drop','update'
             url = "jdbc:h2:file:./db/devDb"
