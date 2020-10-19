@@ -1,25 +1,15 @@
 language: java
+arch: arm64-graviton2
 env: MAVEN_OPTS="-Xmx1024m -XX:MaxPermSize=192m" GRADLE_OPTS="-Xmx1024m -XX:MaxPermSize=192m"
   TERM="dumb"
   NODE_OPTIONS="--max-old-space-size=2048"
 jdk:
 - openjdk8
 sudo: required
+group: edge
+virt: vm
 services:
 - docker
-
-stages:
-- name: build
-  if: fork = false
-- name: test
-  # Run tests on non-forked PR and main builds
-  if: fork = false AND (branch = main OR branch =~ ^release OR branch =~ ^maint-3 OR tag IS present)
-- name: snapshot release
-  if: fork = false AND type = push AND (branch = main OR branch =~ ^maint-3 OR env(RUNDECK_RELEASE) IS present) AND tag IS blank
-- name: tag release
-  if: fork = false AND type = push AND tag =~ ^v
-- name: fork
-  if: fork = true
 
 before_cache:
 - rm -f $HOME/.gradle/caches/modules-2/modules-2.lock
@@ -30,7 +20,16 @@ cache:
   - "$HOME/.gradle/wrapper/"
 
 before_install:
+- sudo apt-get install -y openjdk-8-jdk;
+- export JAVA_HOME=/usr/lib/jvm/java-8-openjdk-arm64/
+- export PATH=$JAVA_HOME/bin:$PATH
+- sudo apt update
+- sudo apt -y install curl dirmngr apt-transport-https lsb-release ca-certificates
+- curl -sL https://deb.nodesource.com/setup_12.x | sudo -E bash -
+- sudo apt -y install nodejs
+- export PATH=/usr/bin/node:$PATH
 - sudo apt-get update -qq
+- sudo apt-get install -y gcc g++ make
 - sudo apt-get install -y jq xmlstarlet
 - sudo chsh --shell $(which bash)
 - pip install awscli --upgrade --user
@@ -50,7 +49,7 @@ jobs:
     # Build artifacts: jars, wars, and docker images
     - script_block 'build' 'bash scripts/travis-build.sh build'
     - script_block 'build.docker.rdtest' build_rdtest
-    # Copy artifacts and upload to s3
+    # Copy artifacts and upload to s30
     - mkdir -p artifacts/packaging
     - mkdir -p artifacts/rundeckapp/build
 
@@ -138,6 +137,10 @@ jobs:
     script:
     - script_block 'docker.pull' pull_rundeck
     - script_block 'selenium' 'bash test/ci-test-docker-selenium.sh'
+
+  - env: JOB='OWASP Dependency Check'
+    script:
+    - script_block 'owasp' './gradlew dependencyCheckAggregate'
 
   # # Stage: snapshot release publishes snapshot artifacts to external repositories
   - stage: snapshot release
