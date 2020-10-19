@@ -80,7 +80,7 @@ for ((i=0; i<$X; i++)) ; do
     fi
     value=`randword`
     cat <<END
-    <node name="$basename$i$suffix" description="$desc" hostname="localhost" osArch="x86_64" osFamily="unix" osName="Mac OS X" osVersion="10.6.5" username="$user" editUrl="" remoteUrl="" tags="$tags" node-executor="local" file-copier="local" bleh="$other">
+    <node name="$basename$i$suffix" description="$desc" hostname="localhost" osArch="arm64" osFamily="unix" osName="Linux" osVersion="10.6.5" username="$user" editUrl="" remoteUrl="" tags="$tags" node-executor="local" file-copier="local" bleh="$other">
         <attribute name="$key" value="$value"/>
     </node>
 END
