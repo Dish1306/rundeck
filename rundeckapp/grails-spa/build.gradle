@@ -26,37 +26,3 @@ task noop() {
   }
 }
 
-task runNpmBuild(type: NpmTask, group: 'build') {
-    dependsOn configurations.lib
-
-    inputs.files(configurations.lib.files)
-    inputs.file 'packages/ui/package.json'
-    inputs.file 'packages/ui/package-lock.json'
-    inputs.file 'packages/ui/babel.config.js'
-    inputs.file 'packages/ui/vue.config.js'
-    inputs.file 'packages/ui/tsconfig.json'
-    inputs.file 'packages/ui/.env.development'
-    inputs.file 'packages/ui/.env.production'
-
-    inputs.dir 'packages/ui/src'
-
-    outputs.dir(file("$spaBuildDir"))
-    outputs.cacheIf { true }
-
-    def npmCommand = System.env.CI ?
-      'ci:build' :
-      'dev:build'
-
-    args = ['run', npmCommand]
-
-    execOverrides {
-      it.workingDir = './packages/ui'
-    }
-}
-
-assemble.dependsOn runNpmBuild
-
-artifacts {
-  spa(file: file(spaBuildDir), name: "${project.name}", type: 'directory', builtBy: runNpmBuild)
-}
-
